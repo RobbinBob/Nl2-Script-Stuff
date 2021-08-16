@@ -1,0 +1,19 @@
+package util.xml.parsers;
+
+import nlvm.lang.Object;
+
+public class DocumentBuilderFactory extends Object
+{
+  protected DocumentBuilderFactory()
+  {
+  }
+
+  //return an instance of DocumentBuilderFactory
+  public static DocumentBuilderFactory newInstance()
+  {
+    DocumentBuilderFactory dbf = new DocumentBuilderFactory();
+    return dbf;
+  }
+
+  
+}

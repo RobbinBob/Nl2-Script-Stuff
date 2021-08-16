@@ -1,0 +1,354 @@
+package util.xml.parsers;
+
+import com.nolimitscoaster.*;
+import nlvm.lang.*;
+import util.dom.*;
+import util.xml.validation.Schema;
+import util.*;
+import nlvm.util.Vector;
+import util.tools.*;
+
+import isystem.iSystemMsg;
+
+public class DocumentBuilder extends Node
+{
+  private bool validating = true;
+  private Schema schema;
+  private bool debug = false;
+
+    //contructor
+  public DocumentBuilder(){}
+
+  //document validation
+  public bool isValidating(){
+    return validating;
+  }
+  public void setValidating(bool v){
+    validating = v;
+  }
+
+  public void setDebug(bool b){
+    debug = b;
+  }
+
+  //schema used for document validation
+  public void setSchema(Schema s){
+    schema = s;
+  }
+  public Schema getSchema(){
+    return schema;
+  }
+
+  //return a default document object
+  public Document newDocument()
+  {
+    return Document.newInstance();
+  }
+
+  //**Parse**
+  //parse File
+  public Document parse(File f){
+    iSystemMsg.warn("Debug mode is enabled", debug);
+    Document document = Document.newInstance();
+
+    //convert file into string
+    String contents = f.returnFileContents();
+    //remove white space
+    String cleaned = removeBlacklisted(contents);
+    bool state = schema.runValidator(cleaned);
+    //detect if the validator was a success
+    if(state)
+    {
+      iSystemMsg.out("Success validating this file", debug);
+    }else
+    {
+      //set document state to unstable
+      iSystemMsg.warn("Failed to validate this file");
+      document.setState(0);
+      return document;
+    }
+
+    //create node tree
+    //get content within <root> node
+    String subContent = getContentWithinTag(cleaned, "root");
+    //System.out.println(subContent);
+    document.setRootNode(subContent);
+
+    //create a list of nodes from the subContent
+    Node[] nodes = getListOfNodesFromContent(subContent);
+    document.setNodes(nodes);
+
+    return document;
+  }
+
+  //parse ResourcePath
+  public Document parse(ResourcePath rp){
+    Document document = Document.newInstance();
+
+    //convert file into string
+    String contents = Tools.loadTextFileFromResource(rp);
+
+    //parse file
+    return document;
+  }
+
+  //removes all the blacklisted chars listed within the schema
+  private String removeBlacklisted(String s){
+    StringBuilder sb = new StringBuilder();
+    char[] whiteChar = schema.getBlackListChar();
+
+    int sLength = s.length();
+    for(int i = 0; i < sLength; i++){
+      int cChar = 0;
+      char curC = s.charAt(i);
+      for(int j = 0; j < whiteChar.length; j++){
+        if(curC == whiteChar[j]){
+          //System.out.println("Skipping this char");
+          break;
+        }else
+        {
+          cChar++;
+          if(cChar == whiteChar.length)
+          {
+            //System.out.println("Adding char '" + curC + "'");
+            sb.append(curC);
+            break;
+          }
+        }
+      }
+    }
+
+    String c = new String(sb);
+
+    return c;
+  }
+
+  private String getContentWithinTag(String content, String id){
+    String subContent = new String();
+    //System.out.println("Length of id " + id.length());
+    int startI = 0;
+    int endI = 0;
+
+    //search for all < then see if there a match name
+    int completeTag = 0;
+    for(int i1 = 0; i1 < content.length(); i1++){
+      if(content.charAt(i1) == '<'){
+        if(content.charAt(i1 + 1) == '/'){
+          //closing tag
+          int curSpace = i1+2;
+          int tagChar = 0;
+          //compare id with tag
+          while(content.charAt(curSpace) == id.charAt(tagChar)){
+            if(tagChar == id.length()-1){
+              //get correct tag data point
+              completeTag++;
+              endI = (curSpace - (id.length()+1));
+              break;
+            }
+            //increment tagChar and curSpace evenly
+            tagChar++;
+            curSpace++;
+          }
+        }else{
+          //possible open tag or single tag
+          int curSpace = i1+1;
+          int tagChar = 0;
+          //compare id with tag
+          while(content.charAt(curSpace) == id.charAt(tagChar)){
+            if(tagChar == id.length()-1){
+              if(content.charAt(curSpace+1) != '>'){
+                return subContent;
+              }else
+              {
+                //get correct tag index
+                startI = (curSpace + 2);
+                completeTag++;
+                break;
+              }
+            }
+            //increment tagChar and curSpace evenly
+            tagChar++;
+            curSpace++;
+          }
+        }
+      }
+    }
+
+    //check if startI less than endI otherwise will cause issues
+    if(startI >= endI){
+      iSystemMsg.err("content param are equal or start and end point is flipped: id '" + id + "' , startPoint '" + startI + "' , endPoint '" + endI + "'");
+      return subContent;
+    }
+    //set subContent to content within the indexes
+    subContent = content.substring(startI, endI);
+
+    return subContent;
+  }
+
+  private Node[] getListOfNodesFromContent(String c){
+    /*
+       CURRENT IMPLEMENTED SYSTEM *CANNOT* READ TEXT BETWEEN TAGS
+          INCLUDING TEXT BETWEEN TAGS WILL THROW AN ERROR
+    
+          This system is based on a 3 phase parser listed below:
+
+    PHASE 1
+        DocumentBuilder side
+     - Split up all the tags by finding the start and ends and return as String[] : Done
+     - Because we've split the tags up incrementally they are still in order : Done
+     - Loop through the String[], see if its plain text or a tag : Partial Done extends PHASE 2
+     - Search through to see if there are attributes, if so create and assign them to Attr : Done
+     
+        Element side
+     - Recieve string of node information, set the node index from the list : Done
+
+        Attr side
+     - Recieve string containing the attribute information, set its id, index and value : Done
+
+    PHASE 2
+        DocumentBuilder side
+     - Loop through all elements, find the slash state and determine if theres nested info : Done
+     - Find closing element if needed using the slash state as guidence : Done
+     - If there are nested info then get information : Done
+     - If information is tags, then set the respective tags into the parent element : Done
+     - If information is text, then create a Text node and set to the parent element : Broken
+
+        Element side
+     - Recieve incoming children and attach to the nested arrays : Done
+
+        Text side
+     - Recieve string containing the text value and save it, save index value : Broken
+
+    PHASE 3
+        DocumentBuidler side
+     - Pack the main nodes using 'backpacking' into the node array and return
+    */
+
+    //PHASE 1 IMPLEMENTATION
+
+    Vector holder = new Vector(); //will be a temp holder for nodes before nodes array is sized
+    //pack all tags into an array of strings for easy use
+    String[] packed = StringTools.cutOutArray(c, '<', '>');
+    
+    for(int i1 = 0; i1 < packed.length; i1++){
+      //System.out.println("Packing node data '" + i1 + "'");
+      iSystemMsg.out("Packing node data '" + packed[i1] + "'", debug);
+      String s = packed[i1];
+      Element e = new Element();
+
+      //set the elements slash state, will be used for declaring heriachy in PHASE 2
+      if(s.startsWith("/")){
+        e.slashState = 0; //single element
+      }else if(s.endsWith("/")){
+        e.slashState = 1; //closing element
+      }else{
+        if(s.startsWith("!")){
+          e.slashState = 3; //non nestable data
+        }else{
+          e.slashState = 2; //opening element
+        }
+      }
+      //remove the / from string
+      s = StringTools.removeChar(s, '/');
+      String tName;
+      bool hasAttr = StringTools.contains(s, '|');
+
+      //find name and attr if present
+      if(hasAttr){
+        //has attributes
+        tName = StringTools.substringIC(s, 0, '|');
+        String attrS = StringTools.substringCS(s, '|');
+        //create string array to hold the attributes
+        String[] attrA = new String[StringTools.charCount(attrS, '=')];
+        iSystemMsg.out(" Found " + attrA.length + " attributes {", debug);
+        int i2 = 1;
+        //loop through the attribute string and split each up
+        while(i2-1 < attrA.length){
+          int i = i2-1;
+          attrA[i] = StringTools.substring0CT(attrS, '"', 2);
+          attrS = StringTools.remove(attrS, attrA[i]);
+          //find attr name and value
+          String aName = StringTools.substring0C(attrA[i], '=');
+          String aValue = StringTools.cutOut(attrA[i], '"', '"');
+          //convert string to value
+          Vector aObject = UtiliTools.createObjectFromStringDefineType(aValue);
+          
+          //create Attr and assign all details to it
+          Attr attr = new Attr(aName, aObject, i2, e);
+          //iSystemMsg.out(" Attr " + attr.index + " Name = '" + attr.name + "' , Value = '" + attr.getValue() + "'", debug);
+          
+          //assign Attr to Element
+          e.addAttribute(attr);
+          i2++;
+        }
+        iSystemMsg.out("}", debug);
+      }else{
+        //has none
+        tName = s;
+      }
+      //set element name
+      e.setName(tName);
+      //add to vector
+      holder.addElement(e);
+    }
+    //PHASE 2
+    /*
+        Get the elements slash state
+        if its not a applicable slash state we move onto the next element
+        otherwise fing the next element with the same name and see what its slash state is
+        if the slash state is applicable, all elements between the 2 matches will be appended
+        to the opening element, im debating having the closing element be removed for ease of 
+        reading
+    */
+    //loop through all elements and view slash state (must work backwards through list)
+    for(int i = holder.size()-1; i >= 0; i--){
+      Element t = (Element) holder.elementAt(i);
+      //find element slashstate and closing tag
+      if(t.slashState == 2){
+        //opening element
+        int es = i+1, ee = 0; //element start/end index
+        int j = i+1; //will step through to find closing tag index
+        while(j < holder.size()){
+          Element e = (Element) holder.elementAt(j);
+          if(t.name.equals(e.name)){
+            ee = j;
+            break;
+          }else{
+            j++;
+            if(j == holder.size()){
+              //override the slash state and assume this tag is single
+              iSystemMsg.warn("element '" + t.name + "' did not have a close element,
+              element has been assumed single, Document stability maybe comprimised");
+              t.slashState = 0;
+              i++;
+            }
+          }
+        }
+        //get nested elements by working from end index backwards then reverse the table
+        Vector r = new Vector();
+        for(int l = ee; l >= es; l--){
+          r.addElement((Element) holder.elementAt(l));
+          holder.removeElement((Element) holder.elementAt(l)); //remove element from list
+        }
+        //TableTools.reverse(r);
+        for(int x = r.size()-1; x > 0; x--){
+          t.addElement((Element) r.elementAt(x));
+        }
+        //System.out.println(t.getElement(0).name);
+      }else{
+        //skip to the next element
+        continue;
+      }
+    }
+    iSystemMsg.out("setup node heirarchy: " + packed.length, debug);
+    //PHASE 3
+    //pack the top nodes into the array and return
+    Node[] nodes = new Node[holder.size()];
+    iSystemMsg.out("Total top nodes: " + holder.size(), debug);
+
+    for(int j = 0; j < nodes.length; j++){
+      nodes[j] = (Element) holder.elementAt(j);
+    }
+    return nodes;
+  }
+}

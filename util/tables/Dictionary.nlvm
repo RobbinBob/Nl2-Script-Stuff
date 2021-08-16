@@ -1,0 +1,64 @@
+package util.tables;
+
+import nlvm.util.Vector;
+
+class Dictionary{
+    //propterties
+    private int c = 0;
+    private Vector d; //contents
+    private Vector k; //keys
+    //backup vector to help resolve errors
+    private Vector[] backup = new Vector[2];
+
+    //constructors
+    public Dictionary(){
+        d = new Vector();
+        k = new Vector();
+        createNewBackup();
+    }
+    public Dictionary(int s){
+        d = new Vector(s);
+        k = new Vector(s);
+    }
+
+    //public methods
+    public int size(){
+        return d.size();
+    }
+    public Object get(String k){
+        return d.elementAt(getKeyIndex(k));
+    }
+    public void store(String k, Object v){
+        equalise();
+    }
+
+    //private methods
+    private void equalise(){ //attempts to fix any errors
+        if(d.size() != k.size()){
+
+        }
+    }
+    private int getKeyIndex(String s){ //gets the index of the key
+        int i = 0;
+        for(int j = 0; j < k.size(); j++){
+            if((String) k.elementAt(j) == s){
+                i = j;
+                break;
+            }
+            if(j == k.size()){
+                i = -1;
+                break;
+            }
+        }
+        return i;
+    }
+    private void createNewBackup(int s){
+        if(s == null){
+            backup[0] = new Vector();
+            backup[1] = new Vector();
+        }else{
+            backup[0] = new Vector(s);
+            backup[1] = new Vector(s);
+        }
+    }
+}

@@ -1,0 +1,141 @@
+package util.dom;
+
+import nlvm.util.Vector;
+import isystem.iSystemMsg;
+
+public class Element extends Node
+{
+  //properties
+  private String c = "";
+  public String name = "";
+  public int index = 0;
+  public Element parent;
+
+  public int elemSize = 0;
+  public int attrSize = 0;
+
+  public static final int type = 1;
+
+  public int slashState = 0;
+
+  private Element[] nestNodes = new Element[0];
+  private Attr[] attr = new Attr[0];
+  private Text text;
+
+  public Element(){}
+  public Element(String n, int i, Element p){
+    name = n;
+    index = i;
+    parent = p;
+  }
+
+  //set methods
+  public void addAttribute(Attr a){
+    if(attr.length == 0){
+      attr = new Attr[1];
+      attr[0] = a;
+    }else{
+      int pSize = attr.length;
+      Vector v = new Vector(pSize);
+      for(int i = 0; i < pSize; i++){
+        v.addElement(attr[i]);
+      }
+      attr = new Attr[pSize+1];
+      for(int j = 0; j < v.size(); j++){
+        attr[j] = (Attr) v.elementAt(j);
+      }
+      attr[attr.length - 1] = a;
+    }
+    attrSize++;
+  }
+
+  public void setName(String n){
+    name = n;
+  }
+
+  //get methods
+  public Attr getAttribute(int i){
+    return attr[i];
+  }
+
+  public Attr getAttribute(String s){
+    int x = 0;
+    for(int i = 0; i < attr.length; i++){
+      if(s.equals(attr[i].name)){
+        x = i;
+        break;
+      }
+    }
+    return attr[x];
+  }
+
+  public void addElement(Element e){
+    if(nestNodes.length == 0){
+      nestNodes = new Element[1];
+      nestNodes[0] = e;
+    }else{
+      int pSize = nestNodes.length;
+      Vector v = new Vector(pSize);
+      for(int i = 0; i < pSize; i++){
+        v.addElement(nestNodes[i]);
+      }
+      nestNodes = new Element[pSize+1];
+      for(int j = 0; j < v.size(); j++){
+        nestNodes[j] = (Element) v.elementAt(j);
+      }
+      nestNodes[nestNodes.length - 1] = e;
+    }
+    e.parent = this;
+    elemSize++;
+  }
+
+  public Element getNode(int i){
+    if(i >= nestNodes.length){
+      return null;
+    }
+    return nestNodes[i];
+  }
+
+  public Element getNode(String s){
+    int x = 0;
+    for(int i = 0; i < nestNodes.length; i++){
+      if(s.equals(nestNodes[i].name)){
+        x = i;
+        break;
+      }
+    }
+    return nestNodes[x];
+  }
+
+  public Element getParentNode(){
+    return parent;
+  } 
+
+  public void setElementAt(int i, Element e){
+    if(i > nestNodes.length){
+      iSystemMsg.warn("Trying to set an non-existant element, index " + i);
+    }
+    iSystemMsg.warn("This method is not implemented!");
+  }
+
+  public bool removeElemAt(int x){
+    if(x > nestNodes.length){
+      return false;
+    }else{
+      Vector v = new Vector();
+      for(int i = 0; i < nestNodes.length; i++){
+        if(x != i){
+          v.addElement(nestNodes[i]);
+        }else{
+          continue;
+        }
+      }
+      nestNodes = new Element[nestNodes.length - 1];
+      for(int j = 0; j < nestNodes.length; j++){
+        nestNodes[j] = (Element) v.elementAt(j);
+      }
+      elemSize--;
+      return true;
+    }
+  }
+}

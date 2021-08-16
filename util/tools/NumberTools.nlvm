@@ -1,0 +1,66 @@
+package util.tools;
+
+import nlvm.math3d.*;
+
+public class NumberTools{
+    private static final double[] ValD = 
+    {
+        0.001, 
+        0.01, 
+        0.1,
+        0,
+        1, 
+        10, 
+        100,
+    };
+
+    public static double parseDouble2(String s){
+        //calculations
+        /* "102.86"
+            1 0 2 \ 8 6
+            +(1 * 100)  | 100
+            +(0 * 10)   | 100
+            +(2 * 1)    | 102
+            +(8 * 0.1)  | 102.8
+            +(6 * 0.01) | 102.86
+        */
+        //convert string to char array
+        char[] c = s.toCharArray();
+        int[] i = new int[c.length];
+        int d = 0; //d represents the decimal place index
+        //loop through each char, convert to string and parseInt()
+        for(int i1 = 0; i1 < c.length; i1++){
+            if(c[i1] == '.'){
+                d = i1;
+                i[i1] = 0;
+                continue; //if value is decimal char set to 0 and skip
+            }
+            //create new Integer and assign the string to it
+            i[i1] = Integer.parseInt(String.valueOf(c[i1]));
+        }
+        double e = 0;
+        //do the math to add up each value mulitplied by its indexed value
+        for(int i2 = 0; i2 < i.length; i2++){
+            double t = (double) i[i2]; //cast int to double
+            e += (t * ValD[(d-i2) + 3]); //multiply t by the indexed value 100-0.001, +3 to get the right decimal index
+        }
+        return e;
+    }
+
+    public static double parseDouble(String s){
+        char[] cA = s.toCharArray();
+        int i = 0, j = 0;
+        while(i < cA.length && cA[i] != '.'){
+            i++;
+        }
+        j = cA.length - i;
+        int a = Integer.parseInt(s.substring(0, i)), b = Integer.parseInt(s.substring(i).equals("") ? "0" : s.substring(i+1));
+        double d = a + (b/(Math.pow(10, j-1)));
+        System.out.println(d);
+        return d;
+    }
+
+    public static float dot(Vector3f a, Vector3f b){
+        return (float) (a.x * b.x + a.y * b.y + a.z * b.z);
+    }
+}

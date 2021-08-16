@@ -1,0 +1,355 @@
+package util.tools;
+
+import nlvm.util.Vector;
+
+public class StringTools{
+
+  private static final char[] nonText = 
+  {
+    '0','1','2','3','4','5','6','7','8','9'
+  };
+
+  public static bool textContains(String s, char c){
+    for(int i = 0; i < s.length(); i++){
+      if(s.charAt(i) == c){
+        return true;
+      }else{
+        continue;
+      }
+    }
+    return false;
+  }
+
+  public static bool textContains(String c, String s){
+    int matchLength = s.length();
+
+    for(int i1 = 0; i1 < c.length(); i1++){
+      if(c.charAt(i1) == s.charAt(0)){
+        //possible match
+        int ch = i1;
+        int mc = 0;
+        while(c.charAt(ch) == s.charAt(mc)){
+          if(mc == matchLength){
+            return true;
+          }
+          mc++;
+          ch++;
+        }
+      }
+      if(i1 == c.length()){
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  public static bool textContains(String c, String[] s){
+    int ts = s.length;
+    int ci = 0;
+
+    for(int i1 = 0; i1 < c.length(); i1++){
+      for(int i2 = 0; i2 < s.length; i2++){
+        System.out.println("Searching for matching id '" + s[i2] + "'");
+        int ml = s[i2].length()-1;
+        if(c.charAt(i1) == s[i2].charAt(0) && ml <= c.length()){
+          //possible match
+          int ch = i1;
+          int mc = 0;
+          while(c.charAt(ch) == s[i2].charAt(mc) && mc < s[i2].length()){
+            //System.out.print(s[i2].charAt(mc));
+            if(mc == ml){
+              System.out.println("Found match in text for '" + s[i2] + "'");
+              return true;
+            }
+            mc++;
+            ch++;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public static String getTextContains(String c, String[] s){
+    int ts = s.length;
+    int ci = 0;
+
+    for(int i1 = 0; i1 < c.length(); i1++){
+      for(int i2 = 0; i2 < s.length; i2++){
+        System.out.println("Searching for matching id '" + s[i2] + "'");
+        int ml = s[i2].length()-1;
+        if(c.charAt(i1) == s[i2].charAt(0) && ml <= c.length()){
+          //possible match
+          int ch = i1;
+          int mc = 0;
+          while(c.charAt(ch) == s[i2].charAt(mc) && mc < s[i2].length()){
+            //System.out.print(s[i2].charAt(mc));
+            if(mc == ml){
+              System.out.println("Found match in text for '" + s[i2] + "'");
+              return s[i2];
+            }
+            mc++;
+            ch++;
+          }
+        }
+      }
+    }
+
+    return "null";
+  }
+
+  //cuts out and returns the content between a and b. does not return content with values a and b
+  public static String cutOut(String c, char a, char b){
+    //start and end index values
+    int s = 0;
+    int e = 0;
+    bool f = false;
+    //loop through c and find first occurence of a and b
+    for(int i = 0; i < c.length(); i++){
+      if(c.charAt(i) == a && !f){
+        s = i+1;
+        f = true;
+      }
+      if(c.charAt(i) == b && f && i > s){
+        e = i;
+        break;
+      }
+      if(i == c.length()){
+        break;
+      }
+    }
+    //check for errors in index values
+    if(s >= e){
+      System.throwRuntimeException("Fatal error: reversed index value, attempt to cut out:
+       " + a + " : " + b + " from string : " + c + " with index value of " + s + " : " + e);
+    }
+    return c.substring(s, e);
+  }
+
+  //cuts out and returns the content between a and b multiple times. does not return values a and b
+  public static String[] cutOutArray(String c, char a, char b){
+    //string array
+    Vector t = new Vector();
+    String[] p = new String[0];
+    int j = 0; //current index in c
+    int x = 0; //amount of slices
+    //loop through c creating a substring from j and getting slice
+    while(j < c.length()){
+      String s = c.substring(j);
+      String v = cutOut(s, a, b);
+      t.addElement(v);
+      x++;
+      j+= (v.length() + 2);
+    }
+    //set array size and cross over the values
+    p = new String[x];
+    for(int i = 0; i < t.size(); i++){
+      p[i] = (String) t.elementAt(i);
+    }
+    return p;
+  }
+  //returns a bool if the string s contains char c
+  public static bool contains(String s, char c){
+    bool r = false;
+    for(int i = 0; i < s.length(); i++){
+      if(s.charAt(i) == c){
+        r = true;
+        break;
+      }
+      if(i == s.length()){
+        break;
+      }
+    }
+    return r;
+  }
+  //slow procces as it loops through each char, only use small strings < 100
+  public static String removeChar(String s, char c){
+    StringBuilder sb = new StringBuilder();
+    char[] a = s.toCharArray();
+    for(int i = 0; i < a.length; i++){
+      if(a[i] == c){
+        continue;
+      }
+      sb.append(a[i]);
+    }
+    return sb.toString();
+  }
+
+  
+  //ADVANCED SUBSTRINGS
+  //returns a string starting from j until c
+  public static String substringIC(String s, int j, char c){
+    int x = j+1;
+    for(int i = j; i < s.length(); i++){
+      if(s.charAt(i) == c){
+        x = i;
+      }
+      if(i == s.length()){
+        break;
+      }
+    }
+    return s.substring(j, x);
+  }
+  //returns a string starting from 0 until c
+  public static String substring0C(String s, char c){
+    int x = indexOfChar(s, c);
+    return s.substring(0, x);
+  }
+  //returns a string starting from c until the end
+  public static String substringCS(String s, char c){
+    int x = indexOfChar(s, c);
+    return s.substring(x+1);
+  }
+  //returns a string starting from 0 until c with threshold t
+  public static String substring0CT(String s, char c, int t){
+    int j = indexOfCharWithThreshold(s, c, t);
+    return s.substring(0, j+1);
+  }
+  //returns a string starting from nth c occurance until end of s
+  public static String substringCTS(String s, char c, int t){
+    int j = indexOfCharWithThreshold(s, c, t);
+    return s.substring(j);
+  }
+
+
+  //returns the first occurence of c in s
+  public static int indexOfChar(String s, char c){
+    int j = 0;
+    for(int i = 0; i < s.length(); i++){
+      if(s.charAt(i) == c){
+        j = i;
+        break;
+      }
+    }
+    return j;
+  }
+  //returns the nth occurence of c in s with t specifing threshold
+  public static int indexOfCharWithThreshold(String s, char c, int t){
+    int j = 0, x = 0;
+    for(int i = 0; i < s.length(); i++){
+      if(s.charAt(i) == c){
+        x++;
+      }
+      if(x == t){
+        j = i;
+        break;
+      }
+    }
+    return j;
+  }
+  //return the amount of times c appears in s
+  public static int charCount(String s, char c){
+    int j = 0;
+    for(int i = 0; i < s.length(); i++){
+      if(s.charAt(i) == c){
+        j++;
+      }
+    }
+    return j;
+  }
+  //return c cut out of s
+  public static String remove(String s, String c){
+    for(int i = 0; i < s.length(); i++){
+      StringBuilder sb = new StringBuilder();
+      int x = 0, y = 0;
+      if(s.charAt(i) == c.charAt(0)){
+        int j = 0;
+        while(j < c.length() && c.charAt(j) == s.charAt(i+j)){
+          if(j == c.length()-1){
+            x = i;
+            y = i+j;
+            //remove string c from s using x,y as indexes
+            String a = s.substring(0, x);
+            String b = s.substring(y+1);
+            sb.append(a);
+            sb.append(b);
+            s = sb.toString();//set s to result
+            break;
+          }
+          j++;
+        }
+      }
+      if(i == s.length() - c.length()){
+        break;
+      }
+    }
+    return s;
+  }
+  //returns true or false if string has numbers
+  public static bool textOnly(String s){
+    char[] c = s.toCharArray();
+    
+    for(int i = 0; i < c.length; i++){
+      for(int j = 0; j < nonText.length; j++){
+        if(c[i] == nonText[j]){
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+  //returns true or false if string has text
+  public static bool numbersOnly(String s){
+    int x = 0;
+    if(s.length() == 1){
+      for(int i = 0; i < nonText.length; i++){
+        if(nonText[i] == s.charAt(0)){
+          x++;
+        }
+      }
+    }else{
+      char[] c = s.toCharArray();
+      for(int i = 0; i < c.length; i++){
+        for(int j = 0; j < nonText.length; j++){
+          if(nonText[j] == c[i]){
+            x++;
+          }
+        }
+      }
+    }
+    
+
+    if(x == s.length()){
+      return true;
+    }else{
+      return false;
+    }
+  }
+  //returns if string contains text
+  public static bool containsText(String s){
+    char[] c = s.toCharArray();
+    int x = 0;
+    for(int i = 0; i < c.length; i++){
+      for(int j = 0; j < nonText.length; j++){
+        if(c[i] != nonText[j]){
+          x++;
+          break;
+        }
+      }
+    }
+    if(x > 0){
+      return true;
+    }
+    return false;
+  }
+  //return if string contains numbers
+  public static bool containsNumber(String s){
+    char[] c = s.toCharArray();
+    int x = 0;
+    for(int i = 0; i < c.length; i++){
+      for(int j = 0; j < nonText.length; j++){
+        if(c[i] == nonText[j]){
+          x++;
+          break;
+        }
+      }
+    }
+    if(x > 0){
+      return true;
+    }
+    return false;
+  }
+}

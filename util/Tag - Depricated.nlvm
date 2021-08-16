@@ -1,0 +1,19 @@
+package util;
+
+//class for holding tags
+public class Tag
+{
+  public static final String[][] tags =
+  {
+    {"<Type>", "</Type>"},
+    {"<TransportSpeed>", "</TransportSpeed>"},
+    {"<TransportHasLaunch>", "</TransportHasLaunch>"},
+    {"<HasWait>", "</HasWait>"},
+    {"<WaitTime>", "</WaitTime>"},
+    {"<BrakeThreshold>", "</BrakeThreshold>"},
+    {"<LiftSpeed>", "</LiftSpeed>"},
+    {"<Wait>", "</Wait>"},
+    {"<Brakes>", "</Brakes>"},
+    {"<TransportDir>", "</TransportDir>"}
+  };
+}

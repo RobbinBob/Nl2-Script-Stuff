@@ -1,0 +1,74 @@
+package util.tools;
+
+import nlvm.lang.*;
+import nlvm.util.Vector;
+
+public class UtiliTools{
+    //parse string and return object value
+    public static Object createObjectFromString(String s){
+        Object o;
+
+        if(isStringBool(s)){
+            //return as Boolean
+            o = new Boolean(parseBoolean(s));
+        }else if(isStringNumber(s)){
+            o = new Double(NumberTools.parseDouble(s)); 
+        }else{
+            //return as String
+            o = new String(s);
+        }
+        return o;
+    }
+
+    public static Vector createObjectFromStringDefineType(String s){
+        Vector v = new Vector(2);
+
+        if(isStringBool(s)){
+            Boolean b = new Boolean(parseBoolean(s));
+            v.addElement(b);
+            v.addElement("Boolean");
+            //System.out.println("Creating bool with " + s);
+        }else if(isStringNumber(s)){
+            Double d = new Double(NumberTools.parseDouble(s));
+            //System.out.println("Creating double with " + s);
+            v.addElement(d);
+            v.addElement("Double");
+        }else{
+            v.addElement(s);
+            v.addElement("String");
+            //System.out.println("Creating string with " + s);
+        }
+
+        return v;
+    }
+
+    public static bool isStringNumber(String s){
+        if(StringTools.textContains(s, '.') || StringTools.numbersOnly(s)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
+    public static bool isStringBool(String s){
+        if(s.equals("true") || s.equals("false") || s.equals("True") || s.equals("False")){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public static bool parseBoolean(String s){
+        if(s.equals("true") || s.equals("false") || s.equals("True") || s.equals("False")){
+            //return as Boolean
+            if(s == "true" || s == "True"){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            System.throwRuntimeException("Invalid string format");
+            return false;
+        }
+    }
+}

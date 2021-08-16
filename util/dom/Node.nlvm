@@ -1,0 +1,6 @@
+package util.dom;
+
+//base node interface thingy idk
+public class Node
+{
+}

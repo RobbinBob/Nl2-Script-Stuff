@@ -1,0 +1,65 @@
+package util.dom;
+
+import isystem.iSystemMsg;
+
+public class Document extends Node
+{
+  //nodes
+  private String contents = "";
+  private Node[] nodes; //contains all node objects attached to root node
+
+  //privates
+  private String documentString;
+  private int state;
+
+  protected Document(){}
+
+  public static Document newInstance(){
+    Document document = new Document();
+    return document;
+  }
+
+  //controlled methods
+  public void setState(int i){
+    state = i;
+  }
+
+  public void setRootNode(String s){
+    contents = s;
+  }
+
+  public void setNodes(Node[] n){
+    nodes = n;
+  }
+
+  // private methods
+  private void printOut(int i, String s){
+    System.out.println("");
+    for(int j = 0; j < i; j++){
+      System.out.print('-');
+    }
+    System.out.print(s);
+  }
+
+  //public methods
+  public Element getElementAt(int i){
+    if(i > nodes.length)iSystemMsg.warn("Attempt to use index out of bounds");
+    return (Element) nodes[i];
+  }
+
+  public String toString(){
+    return documentString;
+  }
+
+  public Element getNode(String s){
+    int x = 0;
+    for(int i = 0; i < nodes.length; i++){
+      Element e = (Element) nodes[i];
+      if(s.equals(e.name)){
+        x = 0;
+        break;
+      }
+    }
+    return (Element) nodes[x];
+  }
+}

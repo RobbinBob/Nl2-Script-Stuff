@@ -1,0 +1,35 @@
+package util.tools;
+
+import nlvm.util.Vector;
+
+public class TableTools{
+
+    //reverse the order of Vector v
+    public static Vector reverse(Vector v){
+        Vector f = new Vector(v.size());
+        for(int i = f.size(); i >=0; i--){
+            f.addElement(v.elementAt(i));
+        }
+        f = null;
+        System.gc();
+        return f;
+    }
+
+    public static bool hasMatch(String[] s, String n){
+        for(int i = 0; i < s.length; i++){
+            if(s[i].equals(n)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int getMatch(String[] s, String n){
+        for(int i = 0; i < s.length; i++){
+            if(s[i].equals(n)){
+                return i;
+            }
+        }
+        return 0;
+    }
+}

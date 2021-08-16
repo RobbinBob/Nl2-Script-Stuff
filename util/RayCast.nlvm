@@ -1,0 +1,151 @@
+/**Overview**
+  Constructors
+   RayCast(SceneObjectElement)
+   RayCast(Vector3f RayVector, Vector3f RayPoint, Vector3f PlaneNormal, Vector3f PlanePoint) [Useful if you want to define a custom plane normal]
+
+  Methods
+   Vector3f - getIntersectionPoint() - Returns the position in 3d space where the point intersects
+   bool - isViewerLookingAt(float range) - Returns whether or not the viewer is looking at a position with a spherical range
+   float - getDistanceToTarget() - Returns the distance from Player view position to intersection
+*/
+
+//Script created by RobbinBob
+package util;
+
+import com.nolimitscoaster.*;
+import nlvm.math3d.*;
+
+public class RayCast
+{
+  Simulator sim = NoLimits.getSimulator();
+
+  Vector3f rv = new Vector3f(); //ray vector
+  Vector3f rp = new Vector3f(); //ray point
+  Vector3f pn = new Vector3f(-1.0f, 0.0f, 1.0f); //plane normal
+  Vector3f pp = new Vector3f(); //plane point
+
+  //init raycast
+  public RayCast(SceneObjectElement planePoint)
+  {
+    Matrix4x4f temp = new Matrix4x4f();
+    temp = planePoint.getAbsoluteMatrix();
+    temp.getTrans(this.pp);
+
+    //System.out.println("Created Ray");
+  }
+
+  public RayCast(Vector3f tRV, Vector3f tRP, Vector3f tPN, Vector3f tPP)
+  {
+    this.rv = tRV;
+    this.rp = tRP;
+    this.pn = tPN;
+    this.pp = tPP;
+  }
+
+  //returns the Vector3f translation where point intersects with plane
+  public Vector3f getIntersectionPoint()
+  {
+    Vector3f ip = new Vector3f();
+    Matrix4x4f temp = new Matrix4x4f();
+    sim.getViewPos(this.rp);
+    sim.getViewMatrix(temp);
+    this.rv = getRotVector(temp);
+    ip = intersect(this.rv, this.rp, this.pn, this.pp);
+
+    return ip;
+  }
+
+  //returns if RayCast within sphere
+  public bool isViewerLookingAt(float range)
+  {
+    Vector3f ip = new Vector3f();
+    Matrix4x4f temp = new Matrix4x4f();
+    sim.getViewPos(this.rp);
+    sim.getViewMatrix(temp);
+    this.rv = getRotVector(temp);
+    ip = intersect(this.rv, this.rp, this.pn, this.pp);
+
+    if(isInsideSphere(ip, this.pp, range))
+    {
+      return true;
+    }else
+    {
+      return false;
+    }
+  }
+
+  //returns distance from ray cast to point
+  public float getDistanceToTarget()
+  {
+    Vector3f ip = new Vector3f();
+    Matrix4x4f temp = new Matrix4x4f();
+    sim.getViewPos(this.rp);
+    sim.getViewMatrix(temp);
+    this.rv = getRotVector(temp);
+    ip = intersect(this.rv, this.rp, this.pn, this.pp);
+
+    float distance = distanceTo(ip, this.pp);
+    return distance;
+  }
+
+
+  //private methods for calculation
+  private Vector3f intersect(Vector3f rayVector, Vector3f rayPoint, Vector3f planeNormal, Vector3f planePoint)
+  {
+    Vector3f diff = new Vector3f(rayPoint);
+    diff.sub(planePoint);
+
+    float prod1 = dot(diff, planeNormal);
+    float prod2 = dot(rayVector, planeNormal);
+    float prod3 = prod1 / prod2;
+
+    Vector3f subbed = new Vector3f();
+    subbed.set(rayVector);
+    subbed.mul(prod3);
+    rayPoint.sub(subbed);
+
+    return rayPoint;
+  }
+
+  private Vector3f getRotVector(Matrix4x4f matrix)
+  {
+    Vector3f temp = new Vector3f(matrix.elemAt(2, 0), matrix.elemAt(2, 1), matrix.elemAt(2, 2));
+    return temp;
+  }
+
+  private float dot(Vector3f v1, Vector3f v2)
+  {
+    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+  }
+
+  private float distanceTo(Vector3f objectPos, Vector3f target)
+  {
+    float x1 = (float)Math.pow((objectPos.x - target.x), 2);
+    float y1 = (float)Math.pow((objectPos.y - target.y), 2);
+    float z1 = (float)Math.pow((objectPos.z - target.z), 2);
+
+    float ans = (x1 + y1 + z1);
+
+    return ans;
+  }
+
+  private bool isInsideSphere(Vector3f objectPos, Vector3f spherePos, float radius)
+  {
+    float x1 = (float)Math.pow((objectPos.x - spherePos.x), 2);
+    float y1 = (float)Math.pow((objectPos.y - spherePos.y), 2);
+    float z1 = (float)Math.pow((objectPos.z - spherePos.z), 2);
+
+    float ans = (x1 + y1 + z1);
+
+    if(ans < (radius * radius))
+    {
+      return true;
+    }else if(ans == (radius * radius))
+    {
+      return true;
+    }else
+    {
+      return false;
+    }
+  }
+}

@@ -1,0 +1,7 @@
+package util.dom;
+
+public interface NodeList
+{
+  public int getLength();
+  public Node item(int index);
+}

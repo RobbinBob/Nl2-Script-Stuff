@@ -1,0 +1,70 @@
+package util.tables;
+
+import nlvm.util.Vector;
+import nlvm.lang.Object;
+
+//something nl2 really should of had native but this will do
+
+public class Stack
+{
+  private Vector v;
+
+  //creates new stack
+  public Stack()
+  {
+    v = new Vector();
+  }
+
+  //returns if stack is empty
+  public bool empty()
+  {
+    return v.isEmpty();
+  }
+
+  //return the top most object in the stack
+  public Object peek()
+  {
+    if(v.isEmpty())return null;
+    return v.elementAt(v.size() - 1);
+  }
+
+  //pop the top object with the stack and return it
+  public Object pop()
+  {
+    if(v.isEmpty())return null;
+    Object o = v.elementAt(v.size() - 1);
+    Vector t = new Vector();
+    for(int i = 0; i < v.size() - 1; i++)
+    {
+      t.addElement(v.elementAt(i));
+    }
+    v.clear();
+    for(int j = 0; j < t.size(); j++)
+    {
+      v.addElement(t.elementAt(j));
+    }
+    return o;
+  }
+
+  //push an object to the top of the stack
+  public void push(Object o)
+  {
+    v.addElement(o);
+  }
+
+  //invert the order in the stack
+  public void invert()
+  {
+    if(v.isEmpty())return;
+    Vector t = new Vector();
+    for(int i = 0; i < v.size(); i++)
+    {
+      t.addElement(v.elementAt(i));
+    }
+    v.clear();
+    for(int j = t.size() - 1; j >= 0; j--)
+    {
+      v.addElement(t.elementAt(j));
+    }
+  }
+}

@@ -1,0 +1,52 @@
+package util.dom;
+
+import nlvm.util.Vector;
+
+public class Attr extends Node{
+  //properties
+  String name = "";
+  Vector value;
+  Element parent;
+  int index = 0;
+
+  public static final int type = 2;
+
+  public Attr(){}
+  public Attr(String n, Vector v, int i, Element p){
+    name = n;
+    value = v;
+    index = i;
+    parent = p;
+  }
+
+  public String getName(){
+    return name;
+  }
+
+  //Object gets
+  public int getValueType(){
+    String v = (String) value.elementAt(1);
+    if(v.equals("Boolean")){
+      return 0;
+    }else if(v.equals("Double")){
+      return 1;
+    }else{
+      return 2;
+    }
+  }
+
+  public Object getValue(){
+    return value.elementAt(0);
+  }
+
+  //specific gets
+  public float getFloatValue(){
+    Double d = (Double) value.elementAt(0);
+    return d.floatValue();
+  }
+
+  public int getIntValue(){
+    Double d = (Double) value.elementAt(0);
+    return d.intValue();
+  }
+}
