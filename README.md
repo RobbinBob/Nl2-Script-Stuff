@@ -1,8 +1,25 @@
 # Nl2-Script-Stuff
-Just like a lot of scripting stuff for nl2
+__Heres a community contribution repo for a multitude of things to do with NoLimits2__
 
-If I have time or someone else would like to create a little help guide for using these apis that would be great.
-These are for more niche tasks/tools such as raycasting, parsing etc
+Currently included:
+* Raycast
+* DOM Parser
+  * DocumentBuilder
+  * Document
+  * Element
+  * Node
+  * NodeList
+  * Text
+  * Attr
+  * Schema
+* Tools
+  * NumberTools
+  * StringTools
+  * TableTools
+  * UtiliTools
+* Tables
+  * Dictionary
+  * Stack
 
 Feel free to contribute to this with other helpful stuff
 Enjoy!
