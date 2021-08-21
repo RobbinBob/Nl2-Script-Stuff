@@ -282,42 +282,24 @@ public class StringTools{
     char[] c = s.toCharArray();
     
     for(int i = 0; i < c.length; i++){
-      for(int j = 0; j < nonText.length; j++){
-        if(c[i] == nonText[j]){
-          return false;
-        }
-      }
-    }
-
-    return true;
+		if(c[i] > 47 && c[i] < 58){
+			return false;
+		}
+	}
+	return true;
   }
   //returns true or false if string has text
   public static bool numbersOnly(String s){
-    int x = 0;
-    if(s.length() == 1){
-      for(int i = 0; i < nonText.length; i++){
-        if(nonText[i] == s.charAt(0)){
-          x++;
-        }
-      }
-    }else{
-      char[] c = s.toCharArray();
-      for(int i = 0; i < c.length; i++){
-        for(int j = 0; j < nonText.length; j++){
-          if(nonText[j] == c[i]){
-            x++;
-          }
-        }
-      }
-    }
-    
-
-    if(x == s.length()){
-      return true;
-    }else{
-      return false;
-    }
+	char[] c = s.toCharArray();
+	
+	for(int i = 0; i < c.length; i++){
+		if(c[i] > 57 && c[i] < 48){
+			return false;
+		}
+	}
+	return true;
   }
+  
   //returns if string contains text
   public static bool containsText(String s){
     char[] c = s.toCharArray();
