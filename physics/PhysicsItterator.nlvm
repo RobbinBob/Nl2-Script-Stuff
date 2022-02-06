@@ -1,0 +1,9 @@
+package physics;
+
+import com.nolimitscoaster.*;
+import nlvm.math3d.*;
+
+public interface PhysicsItterator{
+	
+	public void physicsOut();
+}

@@ -1,0 +1,31 @@
+package physics;
+
+import com.nolimitscoaster.*;
+import nlvm.math3d.*;
+
+/*  
+Goals-
+- Be able to make it record physics from either SceneObject, SceneObjectElement, Train, Car, Seat, Vector3f
+- use an instancing system to create physics itterations
+- be able to control the itterations and update rate of physics recordings
+- define parameters like mass, weight, MOE, friction
+- create basic rotational physics for axis, zacspin, freespin, suspended
+
+ToDO-
+- Create a class to instanciate and run the calculations
+- Create a class to itterate the physics class and control itteration count and precision
+- Define a way to set boundaries to the objects, parameters, attributes etc
+- 
+*/
+
+public class Physics extends Script implements PhysicsItterator{
+	
+	public static float G = -9.81f;	
+	
+	public bool onInit(){return true;}
+	public void onNextFrame(float tick){}
+	
+	public void physicsOut(){
+		System.out.println(s);
+	}
+}
